@@ -1,0 +1,77 @@
+@model Proje.Models.Category
+
+@{
+    ViewData["Title"] = "Kategori Sil";
+    var productCount = Model.Products?.Count ?? 0;
+}
+
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="mb-1 text-danger">Kategoriyi Sil</h2>
+        <p class="text-muted">Kategoriyi kalıcı olarak kaldırmak istediğinizden emin misiniz?</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6 col-md-8">
+        <div class="content-card border-danger">
+            <h4 class="mb-3 text-slate-800">Silme Onayı</h4>
+            
+            <div class="alert alert-danger alert-premium d-flex align-items-center gap-3 mb-4">
+                <i class="bi bi-exclamation-triangle-fill text-danger fs-3"></i>
+                <div>
+                    <strong>Dikkat!</strong> Bu kategori silinecektir. Bu işlem geri alınamaz.
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <table class="table table-bordered">
+                    <tr>
+                        <th class="w-30 bg-light text-slate-700">Kategori Adı</th>
+                        <td><strong>@Model.Name</strong></td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light text-slate-700">Açıklama</th>
+                        <td>@(string.IsNullOrEmpty(Model.Description) ? "-" : Model.Description)</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light text-slate-700">İçerdiği Ürün Çeşidi</th>
+                        <td>
+                            @if (productCount > 0)
+                            {
+                                <span class="badge bg-danger rounded-pill">@productCount Ürün Mevcut</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success rounded-pill">Boş Kategori (Ürün Yok)</span>
+                            }
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            @if (productCount > 0)
+            {
+                <div class="alert alert-warning alert-premium mb-4">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    Bu kategoriye bağlı <strong>@productCount</strong> adet ürün bulunmaktadır. Kategori silinebilmesi için önce bu ürünlerin başka kategorilere taşınması veya silinmesi gerekmektedir.
+                </div>
+            }
+
+            <form asp-action="Delete">
+                <input type="hidden" asp-for="Id" />
+                <div class="d-flex gap-3">
+                    @if (productCount == 0)
+                    {
+                        <button type="submit" class="btn btn-danger btn-premium">
+                            <i class="bi bi-trash-fill"></i> Evet, Sil
+                        </button>
+                    }
+                    <a asp-action="Index" class="btn-premium btn-premium-secondary text-decoration-none">
+                        İptal
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

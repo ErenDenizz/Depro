@@ -1,0 +1,50 @@
+@model Proje.Models.Category
+
+@{
+    ViewData["Title"] = "Kategori Düzenle";
+}
+
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="mb-1">Kategori Düzenle</h2>
+        <p class="text-muted">Seçili kategori bilgilerini güncelleyin.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6 col-md-8">
+        <div class="content-card">
+            <h4 class="mb-4">Kategori Detayları</h4>
+            
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <input type="hidden" asp-for="Id" />
+                
+                <div class="form-group-premium mb-3">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control form-control-premium" />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+                
+                <div class="form-group-premium mb-4">
+                    <label asp-for="Description" class="form-label"></label>
+                    <textarea asp-for="Description" class="form-control form-control-premium" rows="4"></textarea>
+                    <span asp-validation-for="Description" class="text-danger small"></span>
+                </div>
+                
+                <div class="d-flex gap-3">
+                    <button type="submit" class="btn-premium btn-premium-primary">
+                        <i class="bi bi-check-lg"></i> Güncelle
+                    </button>
+                    <a asp-action="Index" class="btn-premium btn-premium-secondary text-decoration-none">
+                        İptal
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

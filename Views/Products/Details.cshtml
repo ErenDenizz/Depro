@@ -1,0 +1,144 @@
+@model Proje.Models.Product
+
+@{
+    ViewData["Title"] = Model.Name + " - Detaylar";
+    var transactions = ViewBag.Transactions as List<Proje.Models.StockTransaction>;
+}
+
+<div class="row align-items-center mb-4">
+    <div class="col">
+        <h2 class="mb-1">Ürün Detayları</h2>
+        <p class="text-muted"><code>@Model.Sku</code> kodlu ürünün güncel bilgileri ve envanter geçmişi.</p>
+    </div>
+    <div class="col-auto d-flex gap-2">
+        <a asp-action="StockMove" asp-route-id="@Model.Id" class="btn-premium btn-premium-primary text-decoration-none">
+            <i class="bi bi-arrow-down-up"></i> Stok Hareketi
+        </a>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-premium btn-premium-secondary text-decoration-none">
+            <i class="bi bi-pencil"></i> Düzenle
+        </a>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            Listeye Dön
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Left Column: Specs -->
+    <div class="col-lg-5">
+        <div class="content-card h-100">
+            <h4 class="mb-4 text-slate-700 border-bottom pb-2">Özellikler</h4>
+
+            <div class="mb-4 text-center py-3 bg-light rounded">
+                <i class="bi bi-box-seam text-primary" style="font-size: 3.5rem;"></i>
+                <h4 class="mt-2 mb-0">@Model.Name</h4>
+                <p class="text-muted small mt-1 mb-0">Barkod / SKU: <strong>@Model.Sku</strong></p>
+            </div>
+
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th class="w-40 bg-light text-slate-700">Kategori</th>
+                        <td>@Model.Category?.Name</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light text-slate-700">Mevcut Stok</th>
+                        <td>
+                            @{
+                                var isOutOfStock = Model.Quantity == 0;
+                                var isLowStock = Model.Quantity <= Model.MinStockLevel && Model.Quantity > 0;
+                            }
+                            <span class="badge-status @(isOutOfStock ? "danger" : isLowStock ? "warning" : "success") fw-bold fs-6">
+                                @Model.Quantity @Model.Unit
+                            </span>
+                            @if (isOutOfStock)
+                            {
+                                <div class="text-danger small mt-1"><i class="bi bi-x-circle-fill"></i> Ürün tükendi! Stok girişi yapın.</div>
+                            }
+                            else if (isLowStock)
+                            {
+                                <div class="text-warning small mt-1"><i class="bi bi-exclamation-triangle-fill"></i> Kritik stok sınırında (@Model.MinStockLevel)!</div>
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light text-slate-700">Raf Konumu</th>
+                        <td><span class="badge bg-secondary font-mono"><i class="bi bi-geo-alt-fill"></i> @(Model.Location ?? "-")</span></td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light text-slate-700">Alış Fiyatı</th>
+                        <td>₺@Model.PurchasePrice.ToString("N2")</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light text-slate-700">Satış Fiyatı</th>
+                        <td>₺@Model.SalePrice.ToString("N2")</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light text-slate-700">Tahmini Toplam Değer</th>
+                        <td>
+                            <strong class="text-success">₺@( (Model.Quantity * Model.SalePrice).ToString("N2") )</strong>
+                            <span class="text-muted small d-block">Mevcut stok x satış fiyatı</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light text-slate-700">Kayıt Tarihi</th>
+                        <td class="small">@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light text-slate-700">Son Güncelleme</th>
+                        <td class="small">@Model.UpdatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Right Column: Product Specific Transactions -->
+    <div class="col-lg-7">
+        <div class="content-card h-100">
+            <h4 class="mb-4 text-slate-700 border-bottom pb-2">Stok Hareket Geçmişi</h4>
+            
+            @if (transactions == null || !transactions.Any())
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-journals fs-1 d-block mb-3 text-gray-300"></i>
+                    Bu ürüne ait herhangi bir stok hareketi bulunmamaktadır.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-premium">
+                        <thead>
+                            <tr>
+                                <th>Tarih</th>
+                                <th>Hareket</th>
+                                <th>Miktar</th>
+                                <th>Neden</th>
+                                <th>İşlemi Yapan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var t in transactions)
+                            {
+                                var isIn = t.TransactionType == Proje.Models.TransactionType.StockIn;
+                                <tr>
+                                    <td class="small">@t.TransactionDate.ToString("dd.MM.yyyy HH:mm")</td>
+                                    <td>
+                                        <span class="badge-status @(isIn ? "success" : "danger")">
+                                            <i class="bi @(isIn ? "bi-arrow-down-left" : "bi-arrow-up-right")"></i>
+                                            @(isIn ? "Giriş" : "Çıkış")
+                                        </span>
+                                    </td>
+                                    <td><strong>@(isIn ? "+" : "-")@t.Quantity</strong> @Model.Unit</td>
+                                    <td><span class="text-muted small">@t.Reason</span></td>
+                                    <td><span class="small">@t.PerformedBy</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

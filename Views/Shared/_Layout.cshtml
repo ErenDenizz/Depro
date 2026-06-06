@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Depo Yönetim Sistemi</title>
+    <link rel="icon" type="image/png" href="~/favicon.ico" asp-append-version="true" />
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Bootstrap Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <!-- Custom Premium CSS -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Proje.styles.css" asp-append-version="true" />
+</head>
+<body>
+    @{
+        var activeController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "Home";
+    }
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="app-sidebar">
+            <div class="sidebar-header" style="justify-content: center;">
+                <img src="~/logo.png" alt="Logo" class="logo-img" style="max-height: 55px; max-width: 90%; object-fit: contain;" asp-append-version="true" />
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li class="sidebar-menu-item @(activeController == "Home" ? "active" : "")">
+                    <a asp-controller="Home" asp-action="Index">
+                        <i class="bi bi-grid-1x2-fill"></i>
+                        <span>Panel (Özet)</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item @(activeController == "Products" ? "active" : "")">
+                    <a asp-controller="Products" asp-action="Index">
+                        <i class="bi bi-boxes"></i>
+                        <span>Ürün Yönetimi</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item @(activeController == "Categories" ? "active" : "")">
+                    <a asp-controller="Categories" asp-action="Index">
+                        <i class="bi bi-tags-fill"></i>
+                        <span>Kategoriler</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item @(activeController == "Transactions" ? "active" : "")">
+                    <a asp-controller="Transactions" asp-action="Index">
+                        <i class="bi bi-arrow-down-up"></i>
+                        <span>Stok Hareketleri</span>
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="sidebar-footer">
+                <span>Yerel Sunucu Modu v1.0</span>
+            </div>
+        </aside>
+
+        <!-- Main Body Content -->
+        <main class="app-content">
+            <!-- Global Flash Messages -->
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-premium alert-dismissible fade show mb-4" role="alert">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                        <span>@TempData["SuccessMessage"]</span>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-premium alert-dismissible fade show mb-4" role="alert">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-exclamation-triangle-fill text-danger fs-5"></i>
+                        <span>@TempData["ErrorMessage"]</span>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+                </div>
+            }
+
+            @RenderBody()
+        </main>
+    </div>
+
+    <!-- Script assets -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

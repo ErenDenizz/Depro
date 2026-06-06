@@ -1,0 +1,117 @@
+@model IEnumerable<Proje.Models.StockTransaction>
+
+@{
+    ViewData["Title"] = "Stok Hareket Geçmişi";
+    var currentSearch = ViewData["CurrentSearch"] as string;
+    var currentType = ViewData["CurrentType"] as string;
+}
+
+<div class="row align-items-center mb-4">
+    <div class="col">
+        <h2 class="mb-1">Stok Hareketleri Geçmişi</h2>
+        <p class="text-muted">Envanterdeki tüm stok giriş ve çıkış işlemlerinin kronolojik kaydı.</p>
+    </div>
+</div>
+
+<!-- Filters Panel -->
+<div class="content-card mb-4">
+    <form method="get" class="row g-3 align-items-end">
+        <div class="col-md-5">
+            <label class="form-label font-semibold text-slate-700">Ürün veya Açıklama Ara</label>
+            <div class="input-group">
+                <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" name="searchString" value="@currentSearch" class="form-control" placeholder="Ürün adı, barkod veya açıklama..." />
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label font-semibold text-slate-700">Hareket Türü</label>
+            <select name="typeFilter" class="form-select">
+                <!option value="" @(string.IsNullOrEmpty(currentType) ? "selected" : "")>Tümü (Giriş ve Çıkış)</!option>
+                <!option value="StockIn" @(currentType == "StockIn" ? "selected" : "")>Sadece Stok Girişleri (+)</!option>
+                <!option value="StockOut" @(currentType == "StockOut" ? "selected" : "")>Sadece Stok Çıkışları (-)</!option>
+            </select>
+        </div>
+
+        <div class="col-md-3 d-grid gap-2">
+            <button type="submit" class="btn-premium btn-premium-primary justify-content-center">
+                Filtreleri Uygula
+            </button>
+            @if (!string.IsNullOrEmpty(currentSearch) || !string.IsNullOrEmpty(currentType))
+            {
+                <a asp-action="Index" class="btn btn-sm btn-link text-center text-decoration-none">Temizle</a>
+            }
+        </div>
+    </form>
+</div>
+
+<!-- Transactions Table Card -->
+<div class="content-card">
+    <div class="table-responsive">
+        <table class="table table-premium">
+            <thead>
+                <tr>
+                    <th>İşlem Tarihi</th>
+                    <th>Barkod/SKU</th>
+                    <th>Ürün Adı</th>
+                    <th>İşlem Türü</th>
+                    <th>Miktar</th>
+                    <th>Neden / Açıklama</th>
+                    <th>İşlemi Yapan</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <i class="bi bi-arrow-down-up fs-1 d-block mb-2 text-gray-300"></i>
+                            Kayıtlı stok hareketi bulunamadı.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var item in Model)
+                    {
+                        var isIn = item.TransactionType == Proje.Models.TransactionType.StockIn;
+                        <tr>
+                            <td><span class="small font-mono text-dark">@item.TransactionDate.ToString("dd.MM.yyyy HH:mm:ss")</span></td>
+                            <td><code class="font-mono text-muted">@(item.Product?.Sku ?? "-")</code></td>
+                            <td>
+                                @if (item.Product != null)
+                                {
+                                    <a asp-controller="Products" asp-action="Details" asp-route-id="@item.ProductId" class="text-slate-800 fw-bold text-decoration-none">
+                                        @item.Product.Name
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-danger">[Silinmiş Ürün]</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge-status @(isIn ? "success" : "danger")">
+                                    <i class="bi @(isIn ? "bi-arrow-down-left" : "bi-arrow-up-right")"></i>
+                                    @(isIn ? "Giriş (+)" : "Çıkış (-)")
+                                </span>
+                            </td>
+                            <td>
+                                <strong class="@(isIn ? "text-success" : "text-danger")">
+                                    @(isIn ? "+" : "-")@item.Quantity
+                                </strong>
+                                <span class="text-muted small">@(item.Product?.Unit ?? "")</span>
+                            </td>
+                            <td>
+                                <span class="text-slate-700">@item.Reason</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-slate-700"><i class="bi bi-person-fill text-muted me-1"></i>@item.PerformedBy</span>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

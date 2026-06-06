@@ -1,0 +1,64 @@
+@model Proje.Models.Product
+
+@{
+    ViewData["Title"] = "Ürün Sil";
+}
+
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="mb-1 text-danger">Ürün Sil</h2>
+        <p class="text-muted">Ürünü ve ürüne ait tüm stok hareket geçmişini kalıcı olarak silmek istediğinizden emin misiniz?</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6 col-md-8">
+        <div class="content-card border-danger">
+            <h4 class="mb-3 text-slate-800">Silme Onayı</h4>
+
+            <div class="alert alert-danger alert-premium d-flex align-items-center gap-3 mb-4">
+                <i class="bi bi-exclamation-octagon-fill text-danger fs-3"></i>
+                <div>
+                    <strong>Uyarı!</strong> Bu ürünü sildiğinizde, ürüne bağlı tüm <strong>giriş-çıkış stok kayıtları (hareketleri)</strong> da kalıcı olarak silinecektir.
+                </div>
+            </div>
+
+            <table class="table table-bordered mb-4">
+                <tbody>
+                    <tr>
+                        <th class="w-30 bg-light text-slate-700">Barkod / SKU</th>
+                        <td><code class="font-mono text-dark fw-bold">@Model.Sku</code></td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light text-slate-700">Ürün Adı</th>
+                        <td><strong>@Model.Name</strong></td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light text-slate-700">Kategori</th>
+                        <td>@Model.Category?.Name</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light text-slate-700">Mevcut Stok</th>
+                        <td>@Model.Quantity @Model.Unit</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light text-slate-700">Raf Konumu</th>
+                        <td>@Model.Location</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <form asp-action="Delete">
+                <input type="hidden" asp-for="Id" />
+                <div class="d-flex gap-3">
+                    <button type="submit" class="btn btn-danger btn-premium">
+                        <i class="bi bi-trash-fill"></i> Evet, Kalıcı Olarak Sil
+                    </button>
+                    <a asp-action="Index" class="btn-premium btn-premium-secondary text-decoration-none">
+                        Vazgeç
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

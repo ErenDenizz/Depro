@@ -1,0 +1,236 @@
+@{
+    ViewData["Title"] = "Kontrol Paneli";
+    var recentTransactions = ViewBag.RecentTransactions as List<Proje.Models.StockTransaction>;
+    var criticalProducts = ViewBag.CriticalProducts as List<Proje.Models.Product>;
+    var categoryStats = ViewBag.CategoryStats as List<Proje.Controllers.CategoryStatViewModel>;
+}
+
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="mb-1 text-slate-800">Depo Kontrol Paneli</h2>
+        <p class="text-muted">Yerel sunucu stok durum analizi ve özet metrikleri.</p>
+    </div>
+</div>
+
+<!-- Dashboard Stats Row -->
+<div class="row g-4 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="card-stat">
+            <div class="stat-icon primary">
+                <i class="bi bi-box-seam"></i>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">@ViewBag.TotalProducts</div>
+                <div class="stat-label">Toplam Ürün Çeşidi</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card-stat">
+            <div class="stat-icon success">
+                <i class="bi bi-layers"></i>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">@ViewBag.TotalStockQuantity</div>
+                <div class="stat-label">Toplam Stok Miktarı</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card-stat">
+            <div class="stat-icon warning">
+                <i class="bi bi-exclamation-triangle"></i>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">@ViewBag.LowStockCount</div>
+                <div class="stat-label">Kritik Stoktaki Ürünler</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card-stat">
+            <div class="stat-icon danger">
+                <i class="bi bi-x-octagon"></i>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">@ViewBag.OutOfStockCount</div>
+                <div class="stat-label">Tükenen Ürünler</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Financial Metrics Row -->
+<div class="row g-4 mb-5">
+    <div class="col-lg-4">
+        <div class="card-stat">
+            <div class="stat-icon info">
+                <i class="bi bi-cash-stack"></i>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">₺@ViewBag.TotalPurchaseValue.ToString("N2")</div>
+                <div class="stat-label">Toplam Depo Maliyeti (Alış)</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card-stat">
+            <div class="stat-icon success">
+                <i class="bi bi-graph-up-arrow"></i>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">₺@ViewBag.TotalSaleValue.ToString("N2")</div>
+                <div class="stat-label">Toplam Depo Değeri (Satış)</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card-stat" style="background: linear-gradient(135deg, #eef2ff, #ffffff); border-color: var(--color-primary-light);">
+            <div class="stat-icon primary">
+                <i class="bi bi-currency-dollar"></i>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value text-indigo">₺@ViewBag.PotentialProfit.ToString("N2")</div>
+                <div class="stat-label">Tahmini Brüt Kar Potansiyeli</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Tables & Details Section -->
+<div class="row g-4">
+    <!-- Left Section: Critical stock and Category stats -->
+    <div class="col-lg-7">
+        <!-- Critical Stock Alert Card -->
+        <div class="content-card">
+            <div class="content-card-title">
+                <span><i class="bi bi-exclamation-octagon text-danger me-2"></i>Kritik Stok Uyarısı</span>
+                <a asp-controller="Products" asp-action="Index" asp-route-statusFilter="LowStock" class="btn btn-sm btn-link text-decoration-none">Tümünü Gör</a>
+            </div>
+            @if (criticalProducts == null || !criticalProducts.Any())
+            {
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-check-circle text-success fs-1 mb-2 d-block"></i>
+                    <span>Tüm ürün stok seviyeleri güvenli durumda!</span>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-premium">
+                        <thead>
+                            <tr>
+                                <th>SKU</th>
+                                <th>Ürün</th>
+                                <th>Kalan</th>
+                                <th>Kritik Eşik</th>
+                                <th>İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in criticalProducts)
+                            {
+                                <tr>
+                                    <td><code class="text-muted">@item.Sku</code></td>
+                                    <td><strong>@item.Name</strong></td>
+                                    <td>
+                                        <span class="badge-status @(item.Quantity == 0 ? "danger" : "warning")">
+                                            @item.Quantity @item.Unit
+                                        </span>
+                                    </td>
+                                    <td>@item.MinStockLevel @item.Unit</td>
+                                    <td>
+                                        <a asp-controller="Products" asp-action="StockMove" asp-route-id="@item.Id" class="btn btn-premium btn-premium-primary btn-action-sm">
+                                            <i class="bi bi-plus-lg"></i> Giriş Yap
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
+        <!-- Categories Stock distribution -->
+        <div class="content-card">
+            <div class="content-card-title">
+                <span><i class="bi bi-pie-chart text-primary me-2"></i>Kategori Dağılımları</span>
+                <a asp-controller="Categories" asp-action="Index" class="btn btn-sm btn-link text-decoration-none">Yönet</a>
+            </div>
+            <div class="row g-4">
+                @if (categoryStats == null || !categoryStats.Any())
+                {
+                    <div class="col text-center py-3 text-muted">
+                        Kategori verisi bulunamadı.
+                    </div>
+                }
+                else
+                {
+                    var maxStock = categoryStats.Max(s => s.TotalStock);
+                    if (maxStock == 0) maxStock = 1;
+
+                    foreach (var stat in categoryStats)
+                    {
+                        var percentage = (stat.TotalStock * 100) / maxStock;
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="font-semibold">@stat.CategoryName</span>
+                                    <span class="text-muted small">@stat.ProductCount Ürün / @stat.TotalStock Adet</span>
+                                </div>
+                                <div class="progress progress-premium">
+                                    <div class="progress-bar bg-primary" role="progressbar" style="width: @percentage%" aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Section: Recent Stock Movements -->
+    <div class="col-lg-5">
+        <div class="content-card h-100">
+            <div class="content-card-title">
+                <span><i class="bi bi-clock-history text-indigo me-2"></i>Son Stok Hareketleri</span>
+                <a asp-controller="Transactions" asp-action="Index" class="btn btn-sm btn-link text-decoration-none">Tüm Kayıtlar</a>
+            </div>
+            @if (recentTransactions == null || !recentTransactions.Any())
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-journal-text fs-1 mb-2 d-block text-gray-300"></i>
+                    <span>Henüz stok hareketi kaydedilmemiş.</span>
+                </div>
+            }
+            else
+            {
+                <div class="list-group list-group-flush">
+                    @foreach (var t in recentTransactions)
+                    {
+                        var isEntry = t.TransactionType == Proje.Models.TransactionType.StockIn;
+                        <div class="list-group-item px-0 py-3 border-0 border-bottom">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1 text-slate-800">@t.Product?.Name</h6>
+                                    <p class="mb-1 text-muted small">
+                                        <i class="bi bi-tag-fill me-1"></i> @t.Reason 
+                                        &bull; <i class="bi bi-person me-1"></i> @t.PerformedBy
+                                    </p>
+                                    <span class="text-muted small" style="font-size: 0.78rem;">
+                                        <i class="bi bi-calendar-event me-1"></i> @t.TransactionDate.ToString("dd.MM.yyyy HH:mm")
+                                    </span>
+                                </div>
+                                <span class="badge-status @(isEntry ? "success" : "danger")">
+                                    <i class="bi @(isEntry ? "bi-arrow-down-left" : "bi-arrow-up-right")"></i>
+                                    @(isEntry ? "+" : "-")@t.Quantity @t.Product?.Unit
+                                </span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

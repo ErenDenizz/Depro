@@ -1,0 +1,114 @@
+@model Proje.Models.Product
+
+@{
+    ViewData["Title"] = "Ürün Düzenle";
+}
+
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="mb-1">Ürünü Düzenle</h2>
+        <p class="text-muted">Mevcut ürün bilgilerini güncelleyin.</p>
+    </div>
+</div>
+
+<div class="content-card">
+    <form asp-action="Edit">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        
+        <!-- Hidden Inputs to preserve properties -->
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="CreatedAt" />
+        <input type="hidden" asp-for="Quantity" /> <!-- Stock adjustments should only be done via StockMove view to log transactions! -->
+
+        <div class="row">
+            <!-- Left Column: Core Info -->
+            <div class="col-md-6 border-end pr-md-4">
+                <h4 class="mb-4 text-slate-700"><i class="bi bi-info-circle me-2"></i>Temel Bilgiler</h4>
+                
+                <div class="form-group-premium mb-3">
+                    <label asp-for="Sku" class="form-label"></label>
+                    <input asp-for="Sku" class="form-control form-control-premium" />
+                    <span asp-validation-for="Sku" class="text-danger small"></span>
+                </div>
+
+                <div class="form-group-premium mb-3">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control form-control-premium" />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+
+                <div class="form-group-premium mb-3">
+                    <label asp-for="CategoryId" class="form-label"></label>
+                    <select asp-for="CategoryId" class="form-select form-control-premium" asp-items="ViewBag.CategoryId"></select>
+                    <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-6">
+                        <div class="form-group-premium mb-3">
+                            <label class="form-label">Mevcut Stok (Kilitli)</label>
+                            <input class="form-control form-control-premium bg-light" type="text" value="@Model.Quantity @Model.Unit" readonly disabled />
+                            <div class="form-text text-muted small">Stok değişiklikleri için "Stok Hareketi" sayfasını kullanın.</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group-premium mb-3">
+                            <label asp-for="Unit" class="form-label"></label>
+                            <input asp-for="Unit" class="form-control form-control-premium" />
+                            <span asp-validation-for="Unit" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group-premium mb-3">
+                    <label asp-for="Location" class="form-label"></label>
+                    <input asp-for="Location" class="form-control form-control-premium" />
+                    <span asp-validation-for="Location" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <!-- Right Column: Financial & Alerts -->
+            <div class="col-md-6 pl-md-4">
+                <h4 class="mb-4 text-slate-700"><i class="bi bi-currency-dollar me-2"></i>Fiyat ve Kritik Limitler</h4>
+
+                <div class="form-group-premium mb-3">
+                    <label asp-for="PurchasePrice" class="form-label"></label>
+                    <div class="input-group">
+                        <span class="input-group-text">₺</span>
+                        <input asp-for="PurchasePrice" class="form-control form-control-premium" type="number" step="0.01" />
+                    </div>
+                    <span asp-validation-for="PurchasePrice" class="text-danger small"></span>
+                </div>
+
+                <div class="form-group-premium mb-3">
+                    <label asp-for="SalePrice" class="form-label"></label>
+                    <div class="input-group">
+                        <span class="input-group-text">₺</span>
+                        <input asp-for="SalePrice" class="form-control form-control-premium" type="number" step="0.01" />
+                    </div>
+                    <span asp-validation-for="SalePrice" class="text-danger small"></span>
+                </div>
+
+                <div class="form-group-premium mb-4">
+                    <label asp-for="MinStockLevel" class="form-label"></label>
+                    <input asp-for="MinStockLevel" class="form-control form-control-premium" type="number" min="0" />
+                    <div class="form-text text-muted small">Stok miktarı bu sınırın altına düştüğünde sistem uyarı verecektir.</div>
+                    <span asp-validation-for="MinStockLevel" class="text-danger small"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="border-top pt-4 mt-3 d-flex gap-3">
+            <button type="submit" class="btn-premium btn-premium-primary">
+                <i class="bi bi-check-lg"></i> Değişiklikleri Kaydet
+            </button>
+            <a asp-action="Index" class="btn-premium btn-premium-secondary text-decoration-none">
+                Vazgeç
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,130 @@
+@model Proje.Models.StockTransaction
+
+@{
+    ViewData["Title"] = "Stok Hareketi Ekle";
+    var product = Model.Product;
+}
+
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="mb-1">Stok Hareketi Girişi</h2>
+        <p class="text-muted">Ürün envanter miktarlarını artırın veya azaltın.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Left Column: Product Summary info -->
+    <div class="col-md-5">
+        <div class="content-card h-100">
+            <h4 class="mb-4 text-slate-700 border-bottom pb-2">Ürün Bilgileri</h4>
+            
+            <div class="mb-4 text-center py-3 bg-light rounded">
+                <i class="bi bi-box-seam text-indigo" style="font-size: 3rem;"></i>
+                <h5 class="mt-2 mb-0">@product?.Name</h5>
+                <p class="text-muted small mt-1 mb-0">Barkod / SKU: <strong>@product?.Sku</strong></p>
+            </div>
+
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th class="w-40 bg-light text-slate-700">Kategori</th>
+                        <td>@product?.Category?.Name</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light text-slate-700">Mevcut Stok</th>
+                        <td>
+                            <strong class="fs-5 text-slate-800">@product?.Quantity</strong> @product?.Unit
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light text-slate-700">Raf Konumu</th>
+                        <td><span class="badge bg-secondary font-mono">@product?.Location</span></td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light text-slate-700">Kritik Stok Seviyesi</th>
+                        <td>@product?.MinStockLevel @product?.Unit</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Right Column: Stock adjustment form -->
+    <div class="col-md-7">
+        <div class="content-card h-100">
+            <h4 class="mb-4 text-slate-700 border-bottom pb-2">Hareketi Tanımla</h4>
+
+            <form asp-action="StockMove">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <input type="hidden" asp-for="ProductId" />
+
+                <!-- Action Type selection -->
+                <div class="form-group-premium mb-4">
+                    <label class="form-label d-block">İşlem Türü</label>
+                    <div class="btn-group w-100" role="group" aria-label="Stock action types">
+                        <input type="radio" class="btn-check" name="TransactionType" id="typeIn" value="StockIn" checked autocomplete="off">
+                        <label class="btn btn-outline-success py-2 w-50" for="typeIn">
+                            <i class="bi bi-arrow-down-left-square-fill me-1"></i> Stok Girişi (+)
+                        </label>
+
+                        <input type="radio" class="btn-check" name="TransactionType" id="typeOut" value="StockOut" autocomplete="off">
+                        <label class="btn btn-outline-danger py-2 w-50" for="typeOut">
+                            <i class="bi bi-arrow-up-right-square-fill me-1"></i> Stok Çıkışı (-)
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Quantity input -->
+                <div class="form-group-premium mb-3">
+                    <label asp-for="Quantity" class="form-label">Hareket Miktarı (@product?.Unit)</label>
+                    <input asp-for="Quantity" class="form-control form-control-premium" type="number" min="1" value="1" />
+                    <span asp-validation-for="Quantity" class="text-danger small"></span>
+                </div>
+
+                <!-- Performed By input -->
+                <div class="form-group-premium mb-3">
+                    <label asp-for="PerformedBy" class="form-label">İşlemi Gerçekleştiren</label>
+                    <input asp-for="PerformedBy" class="form-control form-control-premium" value="Yönetici" />
+                    <span asp-validation-for="PerformedBy" class="text-danger small"></span>
+                </div>
+
+                <!-- Reason input -->
+                <div class="form-group-premium mb-4">
+                    <label asp-for="Reason" class="form-label">Hareket Nedeni / Açıklama</label>
+                    <input asp-for="Reason" class="form-control form-control-premium" placeholder="Örn: Yeni sevkiyat alımı, satış, fire vb." />
+                    <span asp-validation-for="Reason" class="text-danger small"></span>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary quick-reason">Yeni Satın Alma</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary quick-reason">Sipariş Gönderimi</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary quick-reason">Sayım Düzeltmesi</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary quick-reason">İade Kabul</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary quick-reason">Fire / Bozuk Ürün</button>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3 pt-2">
+                    <button type="submit" class="btn-premium btn-premium-primary">
+                        <i class="bi bi-check-lg"></i> Hareketi Kaydet
+                    </button>
+                    <a asp-action="Index" class="btn-premium btn-premium-secondary text-decoration-none">
+                        Vazgeç
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        $(document).ready(function() {
+            // Helper buttons to fill in the reason input
+            $('.quick-reason').click(function() {
+                var text = $(this).text();
+                $('#Reason').val(text);
+            });
+        });
+    </script>
+}

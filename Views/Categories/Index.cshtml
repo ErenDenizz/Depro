@@ -1,0 +1,70 @@
+@model IEnumerable<Proje.Models.Category>
+
+@{
+    ViewData["Title"] = "Kategoriler";
+}
+
+<div class="row align-items-center mb-4">
+    <div class="col">
+        <h2 class="mb-1">Kategori Yönetimi</h2>
+        <p class="text-muted">Ürünlerinizi sınıflandırmak için kullanılan kategorileri yönetin.</p>
+    </div>
+    <div class="col-auto">
+        <a asp-action="Create" class="btn-premium btn-premium-primary text-decoration-none">
+            <i class="bi bi-plus-lg"></i> Yeni Kategori Ekle
+        </a>
+    </div>
+</div>
+
+<div class="content-card">
+    <div class="table-responsive">
+        <table class="table table-premium">
+            <thead>
+                <tr>
+                    <th>Kategori Adı</th>
+                    <th>Açıklama</th>
+                    <th>Ürün Çeşidi</th>
+                    <th class="text-end">İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="4" class="text-center py-4 text-muted">
+                            <i class="bi bi-folder-x fs-1 d-block mb-2 text-gray-300"></i>
+                            Kayıtlı kategori bulunamadı.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@item.Name</strong>
+                            </td>
+                            <td>
+                                <span class="text-muted">@(string.IsNullOrEmpty(item.Description) ? "Açıklama girilmemiş" : item.Description)</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary rounded-pill">@(item.Products?.Count ?? 0) Ürün</span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-premium btn-premium-secondary btn-action-sm me-2">
+                                        <i class="bi bi-pencil"></i> Düzenle
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger btn-action-sm">
+                                        <i class="bi bi-trash"></i> Sil
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

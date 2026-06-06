@@ -1,0 +1,147 @@
+@model IEnumerable<Proje.Models.Product>
+
+@{
+    ViewData["Title"] = "Ürün Yönetimi";
+    var currentSearch = ViewData["CurrentSearch"] as string;
+    var currentCategory = ViewData["CurrentCategory"] as int?;
+    var currentStatus = ViewData["CurrentStatus"] as string;
+}
+
+<div class="row align-items-center mb-4">
+    <div class="col">
+        <h2 class="mb-1">Ürün Yönetimi</h2>
+        <p class="text-muted">Depodaki tüm ürünlerin takibini yapın, stok seviyelerini izleyin.</p>
+    </div>
+    <div class="col-auto d-flex gap-2">
+        <a asp-action="ExportCsv" asp-route-searchString="@currentSearch" asp-route-categoryId="@currentCategory" asp-route-statusFilter="@currentStatus" class="btn-premium btn-premium-secondary text-decoration-none">
+            <i class="bi bi-filetype-csv text-success"></i> CSV Raporu İndir
+        </a>
+        <a asp-action="Create" class="btn-premium btn-premium-primary text-decoration-none">
+            <i class="bi bi-plus-lg"></i> Yeni Ürün Ekle
+        </a>
+    </div>
+</div>
+
+<!-- Filters Panel -->
+<div class="content-card mb-4">
+    <form method="get" asp-action="Index" class="row g-3 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label font-semibold text-slate-700">Arama</label>
+            <div class="input-group">
+                <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" name="searchString" value="@currentSearch" class="form-control" placeholder="Ürün adı, barkod veya raf ara..." />
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <label class="form-label font-semibold text-slate-700">Kategori</label>
+            <select name="categoryId" class="form-select" asp-items="ViewBag.Categories">
+                <option value="">Tüm Kategoriler</option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label font-semibold text-slate-700">Stok Durumu</label>
+            <select name="statusFilter" class="form-select">
+                <!option value="" @(string.IsNullOrEmpty(currentStatus) ? "selected" : "")>Tümü</!option>
+                <!option value="NormalStock" @(currentStatus == "NormalStock" ? "selected" : "")>Yeterli Stok</!option>
+                <!option value="LowStock" @(currentStatus == "LowStock" ? "selected" : "")>Kritik Seviye</!option>
+                <!option value="OutOfStock" @(currentStatus == "OutOfStock" ? "selected" : "")>Tükenenler</!option>
+            </select>
+        </div>
+
+        <div class="col-md-2 d-grid gap-2">
+            <button type="submit" class="btn-premium btn-premium-primary justify-content-center">
+                Filtrele
+            </button>
+            @if (!string.IsNullOrEmpty(currentSearch) || currentCategory.HasValue || !string.IsNullOrEmpty(currentStatus))
+            {
+                <a asp-action="Index" class="btn btn-sm btn-link text-center text-decoration-none">Temizle</a>
+            }
+        </div>
+    </form>
+</div>
+
+<!-- Products Table Card -->
+<div class="content-card">
+    <div class="table-responsive">
+        <table class="table table-premium">
+            <thead>
+                <tr>
+                    <th>Barkod/SKU</th>
+                    <th>Ürün Adı</th>
+                    <th>Kategori</th>
+                    <th>Stok Miktarı</th>
+                    <th>Birim</th>
+                    <th>Konum</th>
+                    <th>Alış Fiyatı</th>
+                    <th>Satış Fiyatı</th>
+                    <th class="text-center">İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="9" class="text-center py-5 text-muted">
+                            <i class="bi bi-box2 fs-1 d-block mb-2 text-gray-300"></i>
+                            Arama kriterlerine uygun ürün bulunamadı.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var item in Model)
+                    {
+                        var isOutOfStock = item.Quantity == 0;
+                        var isLowStock = item.Quantity <= item.MinStockLevel && item.Quantity > 0;
+                        
+                        <tr>
+                            <td><code class="font-mono text-dark fw-bold">@item.Sku</code></td>
+                            <td>
+                                <div>
+                                    <strong class="text-slate-800">@item.Name</strong>
+                                    @if (isOutOfStock)
+                                    {
+                                        <span class="badge bg-danger ms-1 text-white" style="font-size: 0.65rem;">Tükendi</span>
+                                    }
+                                    else if (isLowStock)
+                                    {
+                                        <span class="badge bg-warning text-dark ms-1" style="font-size: 0.65rem;">Kritik</span>
+                                    }
+                                </div>
+                            </td>
+                            <td><span class="text-muted">@(item.Category?.Name ?? "-")</span></td>
+                            <td>
+                                <span class="badge-status @(isOutOfStock ? "danger" : isLowStock ? "warning" : "success")">
+                                    @item.Quantity
+                                </span>
+                            </td>
+                            <td><span class="text-muted">@item.Unit</span></td>
+                            <td><span class="badge bg-light text-dark font-mono"><i class="bi bi-geo-alt-fill text-muted me-1"></i>@(item.Location ?? "-")</span></td>
+                            <td>₺@item.PurchasePrice.ToString("N2")</td>
+                            <td>₺@item.SalePrice.ToString("N2")</td>
+                            <td class="text-center">
+                                <div class="btn-group">
+                                    <!-- Stock In/Out movement button -->
+                                    <a asp-action="StockMove" asp-route-id="@item.Id" class="btn btn-premium btn-premium-primary btn-action-sm me-1" title="Stok Ekle/Çıkar">
+                                        <i class="bi bi-arrow-down-up"></i> Hareketi
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-premium btn-premium-secondary btn-action-sm me-1" title="Detaylar">
+                                        <i class="bi bi-eye"></i> Detay
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-premium btn-premium-secondary btn-action-sm me-1" title="Düzenle">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger btn-action-sm" title="Sil">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
