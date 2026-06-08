@@ -129,3 +129,4 @@ C:\Users\user\Desktop\Proje\obj\Debug\net10.0\Proje.csproj.AssemblyReference.cac
 C:\Users\user\Desktop\Proje\obj\Debug\net10.0\compressed\6ao4ir9xu0-{0}-rfc9uqxsim-rfc9uqxsim.gz
 C:\Users\user\Desktop\Proje\obj\Debug\net10.0\Proje.csproj.Up2Date
 C:\Users\user\Desktop\Proje\obj\Debug\net10.0\compressed\1j96l99u4q-{0}-f03ew0c984-f03ew0c984.gz
+C:\Users\user\Desktop\Proje\obj\Debug\net10.0\Proje.sourcelink.json
